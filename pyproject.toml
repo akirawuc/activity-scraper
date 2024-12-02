@@ -8,6 +8,9 @@ packages = [{include = "activity_scraper"}]
 
 [tool.poetry.dependencies]
 python = "^3.11"
+requests = "^2.32.3"
+beautifulsoup4 = "^4.12.3"
+pandas = "^2.2.3"
 
 
 [build-system]
