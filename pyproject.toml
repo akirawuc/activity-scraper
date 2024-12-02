@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "activity-scraper"
+version = "0.1.0"
+description = ""
+authors = ["akirawuc <stu970029@gmail.com>"]
+readme = "README.md"
+packages = [{include = "activity_scraper"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
