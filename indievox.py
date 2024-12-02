@@ -1,6 +1,39 @@
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
+import re
+
+def get_game_details(event_id):
+    url = f"https://www.indievox.com/activity/game/{event_id}"
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        "X-Requested-With": "XMLHttpRequest",
+    }
+    
+    try:
+        response = requests.get(url, headers=headers)
+        response.raise_for_status()
+        soup = BeautifulSoup(response.text, 'html.parser')
+        
+        rows = soup.select('#gameList table tbody tr')
+        if not rows:
+            return []
+            
+        details = []
+        for row in rows:
+            cells = row.find_all('td')
+            if len(cells) >= 4:
+                detail = {
+                    'datetime': cells[0].text.strip(),
+                    'venue': cells[2].text.strip(),
+                    'status': cells[3].text.strip()
+                }
+                print(detail)
+                details.append(detail)
+        return details
+        
+    except requests.RequestException:
+        return []
 
 def scrape_indievox_events():
     events = []
@@ -35,13 +68,25 @@ def scrape_indievox_events():
             
             for card in cards:
                 link = card.find('a')
-                event = {
+                if not link:
+                    continue
+                
+                event_id = link['href'].split('/')[-1]
+                game_details = get_game_details(event_id)
+                
+                base_event = {
                     'title': card.select_one('.multi_ellipsis').text.strip(),
-                    'date': card.select_one('.date').text.strip(),
                     'image': card.select_one('img')['src'],
-                    'link': 'https://www.indievox.com' + link['href'] if link else None,
+                    'link': 'https://www.indievox.com' + link['href'],
                 }
-                events.append(event)
+                
+                if game_details:
+                    for detail in game_details:
+                        event = base_event.copy()
+                        event.update(detail)
+                        events.append(event)
+                else:
+                    events.append(base_event)
                 
             page += 1
             
